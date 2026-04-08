@@ -1,52 +1,21 @@
 # Operations Reference
 
-Commands agents can run when asked. These are not in package.json because
+Commands agents can run when asked. These are not in a Makefile because
 humans don't type them — agents execute them directly.
 
 ## Dev Server
 
-The `npm run dev` script auto-detects SQLite vs Postgres from DATABASE_URL.
-Under the hood it runs one of these flows:
-
-### SQLite mode (default)
+### Native (recommended for Codespaces)
 
 ```bash
-# Start server (generate client + push schema + watch)
-cd server && ./prisma/sqlite-push.sh && npm run dev
-
-# Start client (waits for server health first)
-cd client && npx wait-on http://localhost:3000/api/health && npx vite --host
+./scripts/dev.sh
+# → http://localhost:8000
 ```
 
-Run both concurrently:
-```bash
-concurrently -n server,client -c green,magenta \
-  "cd server && ./prisma/sqlite-push.sh && npm run dev" \
-  "cd client && npx wait-on http://localhost:3000/api/health && npx vite --host"
-```
-
-### Postgres mode
-
-Requires Docker. Start the database container first:
-```bash
-set -a && . ./.env && set +a
-DOCKER_CONTEXT=$DEV_DOCKER_CONTEXT docker compose -f docker-compose.dev.yml up db
-```
-
-Then in separate terminals:
-```bash
-# Server (wait for DB, generate, migrate, start)
-set -a && . ./.env && set +a
-./docker/wait-for-db.sh
-cd server && npx prisma generate && npx prisma migrate dev && npm run dev
-
-# Client
-cd client && npx wait-on http://localhost:3000/api/health && npx vite --host
-```
+Activates `.venv`, loads `.env`, applies migrations, starts uvicorn with `--reload`.
 
 ### Full Docker stack
 
-Run everything (db + server + client) in Docker:
 ```bash
 set -a && . ./.env && set +a
 DOCKER_CONTEXT=$DEV_DOCKER_CONTEXT docker compose -f docker-compose.dev.yml up --build
@@ -54,76 +23,83 @@ DOCKER_CONTEXT=$DEV_DOCKER_CONTEXT docker compose -f docker-compose.dev.yml up -
 
 Stop:
 ```bash
-set -a && . ./.env && set +a
 DOCKER_CONTEXT=$DEV_DOCKER_CONTEXT docker compose -f docker-compose.dev.yml down
 ```
 
 ## Database
 
-### Run migrations (inside Docker)
+### Apply migrations
 
 ```bash
-set -a && . ./.env && set +a
-DOCKER_CONTEXT=$DEV_DOCKER_CONTEXT docker compose -f docker-compose.dev.yml exec server npx prisma migrate dev
+alembic upgrade head
 ```
 
-### Prisma Studio
+### Create a new migration (after changing app/models.py)
 
 ```bash
-cd server && npx prisma studio
+alembic revision --autogenerate -m "describe your change"
+alembic upgrade head
 ```
 
-### Generate Prisma client
+### Roll back one step
 
 ```bash
-cd server && npx prisma generate
+alembic downgrade -1
 ```
 
-### Seed database
+### Show current revision
 
 ```bash
-cd server && npx tsx prisma/seed.ts
+alembic current
+```
+
+### Show migration history
+
+```bash
+alembic history --verbose
 ```
 
 ## Build
 
-### Build server + client
+### Build production Docker image
 
 ```bash
-cd server && npm run build && cd ../client && npm run build
+docker build -f docker/Dockerfile.app -t python-app:${TAG:-latest} .
 ```
 
-### Build Docker image
+### Build dev Docker image
 
 ```bash
-docker build -f docker/Dockerfile.server -t collegenav-server:${TAG:-latest} .
+docker build -f docker/Dockerfile.app.dev -t python-app-dev:latest .
 ```
 
 ## Testing
 
-### Server tests (Vitest)
+### Run all tests
 
 ```bash
-cd server && npx vitest run
+python3 -m pytest tests/ -v
 ```
 
-### Client tests (Vitest)
+### Run with coverage
 
 ```bash
-cd client && npx vitest run
+python3 -m pytest tests/ --cov=app --cov-report=term-missing
 ```
 
-### E2E tests (Playwright)
+### Run a single test file
 
-Requires running dev server.
 ```bash
-npx playwright test
+python3 -m pytest tests/test_app.py -v
+```
+
+## Linting
+
+```bash
+ruff check app/ tests/
+ruff format app/ tests/
 ```
 
 ## Deploy
 
 See `scripts/deploy.sh` and [docs/deployment.md](../docs/deployment.md).
-
-## Version
-
-See `scripts/version.sh`. Bumps the version in package.json using date-based format.

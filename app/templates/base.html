@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ app_name | default("Python App") }}{% endblock %}</title>
+
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="/static/css/app.css">
+
+  <!-- htmx — server-driven partial updates -->
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js" defer></script>
+
+  <!-- Alpine.js — small client-side interactions (defer after htmx) -->
+  <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+  {% block head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen" x-data="{ navOpen: false }">
+
+  <!-- Top navigation bar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a href="/">🐍 Python App Template</a>
+    </div>
+    <div class="navbar-actions">
+      <!-- Login button (placeholder — wire up real auth later) -->
+      <button
+        class="btn btn-outline"
+        @click="$dispatch('open-modal', 'login')"
+        title="Sign in"
+      >
+        Sign in
+      </button>
+    </div>
+  </nav>
+
+  <!-- Simple login modal (Alpine-driven) -->
+  <div
+    class="modal-backdrop"
+    x-data="{ open: false }"
+    x-show="open"
+    x-on:open-modal.window="if ($event.detail === 'login') open = true"
+    x-on:keydown.escape.window="open = false"
+    x-transition
+    style="display:none"
+  >
+    <div class="modal" @click.outside="open = false">
+      <h2>Sign in</h2>
+      <p class="text-muted">Authentication is a placeholder — wire up OAuth or session login in <code>app/routers/auth.py</code>.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" @click="open = false">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page content -->
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>Python App Template · FastAPI + htmx + Alpine.js</span>
+  </footer>
+
+</body>
+</html>

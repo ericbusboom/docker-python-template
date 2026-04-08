@@ -1,13 +1,11 @@
 {
-  "name": "docker-nodeapp",
-  "version": "0.20260406.1",
+  "name": "docker-pythonapp",
+  "version": "0.20260408.1",
   "private": true,
+  "description": "Python FastAPI application template",
   "scripts": {
     "dev": "./scripts/dev.sh",
-    "test:server": "cd server && npx vitest run",
-    "test:client": "cd client && npx vitest run"
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2"
+    "install": "./scripts/install.sh",
+    "test": "python3 -m pytest tests/ -v"
   }
 }

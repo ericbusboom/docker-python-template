@@ -1,0 +1,26 @@
+# Python App Template — dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web framework ──────────────────────────────────────────
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+jinja2==3.1.6
+python-multipart==0.0.20     # form parsing
+
+# ── Database ───────────────────────────────────────────────
+sqlalchemy==2.0.40
+aiosqlite==0.21.0             # async SQLite driver
+alembic==1.15.2
+
+# ── Scheduler ─────────────────────────────────────────────
+apscheduler==3.11.0
+
+# ── Config ────────────────────────────────────────────────
+pydantic-settings==2.9.1
+
+# ── Utilities ─────────────────────────────────────────────
+python-dotenv==1.1.0
+
+# ── Optional: Postgres support (uncomment when needed) ────
+# asyncpg==0.30.0
+# psycopg[binary,pool]==3.2.6

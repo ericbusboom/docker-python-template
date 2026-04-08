@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Home — Python App Template{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Python App Template</h1>
+  <p class="lead">
+    A Python-first web application template with
+    <strong>FastAPI</strong>, <strong>SQLAlchemy</strong>, <strong>Alembic</strong>,
+    <strong>htmx</strong>, and <strong>Alpine.js</strong>.
+  </p>
+</div>
+
+<!-- ───────── Counter demo ───────── -->
+<section class="card" id="counter-section">
+  <h2>Counter Demo</h2>
+  <p class="text-muted">
+    Clicking <em>Increment</em> sends an htmx POST to the server, which updates the
+    database and returns a fresh HTML partial — no full page reload, no JS framework.
+  </p>
+
+  <!-- htmx replaces this div with the partial returned by the server -->
+  <div id="counter-widget">
+    {% include "partials/counter.html" %}
+  </div>
+</section>
+
+<!-- ───────── Alpine.js demo ───────── -->
+<section class="card" x-data="{ expanded: false }">
+  <h2>
+    Alpine.js Interactions
+    <button
+      class="btn btn-sm btn-outline"
+      @click="expanded = !expanded"
+      x-text="expanded ? 'Collapse ▲' : 'Expand ▼'"
+    >Expand ▼</button>
+  </h2>
+
+  <div x-show="expanded" x-transition>
+    <p>
+      This panel is toggled with <strong>Alpine.js</strong> — pure client-side state,
+      no server round-trip needed.  Use Alpine for modals, dropdowns, tabs, and other
+      local UI state.  Use htmx for anything that needs data from the server.
+    </p>
+    <ul>
+      <li>Toggle, modals, tabs → <strong>Alpine.js</strong></li>
+      <li>Partial page updates from server data → <strong>htmx</strong></li>
+      <li>Full page loads → <strong>FastAPI + Jinja2</strong></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ───────── Stack overview ───────── -->
+<section class="card">
+  <h2>Stack</h2>
+  <table class="stack-table">
+    <thead>
+      <tr><th>Layer</th><th>Technology</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Web framework</td><td>FastAPI (Python)</td></tr>
+      <tr><td>Templates</td><td>Jinja2 (server-rendered HTML)</td></tr>
+      <tr><td>Partial updates</td><td>htmx</td></tr>
+      <tr><td>Client interactions</td><td>Alpine.js</td></tr>
+      <tr><td>Database</td><td>SQLite (default) → Postgres-ready</td></tr>
+      <tr><td>ORM / migrations</td><td>SQLAlchemy 2.x + Alembic</td></tr>
+      <tr><td>Scheduled jobs</td><td>APScheduler</td></tr>
+      <tr><td>Container</td><td>Docker (Python 3.12-slim)</td></tr>
+      <tr><td>Config / secrets</td><td>dotconfig + SOPS + age</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}
