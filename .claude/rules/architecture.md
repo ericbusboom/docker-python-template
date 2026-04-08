@@ -1,67 +1,54 @@
 # Architecture Rules
 
-## Service Layer Pattern
+## Routers Are Thin
 
-Business logic lives in service classes, not in route handlers. Routes
-are thin adapters: validate input, call a service method, format the
-response.
-
-Access services through `ServiceRegistry`:
-
-```typescript
-const services = ServiceRegistry.create('UI');  // or 'MCP'
-const users = await services.users.list();
-```
-
-**Adding a new service:**
-
-1. Create `server/src/services/<name>.service.ts` with a class that
-   accepts a Prisma client in its constructor.
-2. Add a property and instantiation in `ServiceRegistry`.
-3. Use it from routes via `ServiceRegistry.create('UI')`.
+Business logic lives in service modules (`app/services/`), not in
+route handlers.  Routers validate input, call a service function, and
+return the response.
 
 ## API Conventions
 
-- All API routes are prefixed with `/api`
-- JSON request/response bodies
+- All JSON API routes are prefixed with `/api`
+- HTML routes return full pages or htmx partials (no prefix)
 - Standard HTTP status codes
-- Centralized error handler returns `{ error: string, detail?: string }`
-- Typed errors via `ServiceError` class hierarchy in
-  `server/src/errors/`
+- FastAPI dependency injection for DB sessions and settings
+- Raise `HTTPException` for expected errors; let the global exception
+  handler deal with unexpected ones
 
 ## Database Philosophy
 
-This project uses PostgreSQL as the single data store. Before reaching
-for additional services:
+SQLite is the default.  Before reaching for additional services:
 
-- Need document/schemaless data? Use **JSONB** columns.
-- Need key-value cache? Use a JSONB table or `UNLOGGED` tables.
-- Need pub/sub? Use **LISTEN/NOTIFY**.
-- Need job queues? Use LISTEN/NOTIFY + a jobs table with `FOR UPDATE SKIP LOCKED`.
-- Need full-text search? Use `tsvector`/`tsquery`.
+- Need document/schemaless data? Use a JSON column.
+- Need a job queue? Use a database table with `SELECT ... FOR UPDATE SKIP LOCKED` (Postgres).
+- Need full-text search? Use SQLite FTS5 or Postgres `tsvector`.
 
-**Do not add MongoDB or Redis.** If a use case seems to require them,
-demonstrate the PostgreSQL equivalent first. Only add them after
-discussion with the stakeholder.
+**Do not add Redis or MongoDB** without stakeholder discussion.
 
-## Dual Database Support
+## SQLite → Postgres Migration Path
 
-The project supports both SQLite (dev default) and PostgreSQL (production).
-The Prisma client is initialized lazily in `server/src/services/prisma.ts`
-based on the `DATABASE_URL` format:
+- Always use `DATABASE_URL` — never hardcode the connection string.
+- Use SQLAlchemy ORM methods, not raw SQL.
+- When raw SQL is unavoidable, check the dialect and branch:
+  ```python
+  from sqlalchemy import inspect
+  if inspect(engine).dialect.name == "sqlite":
+      ...
+  ```
+- Add `asyncpg` to `requirements.txt` and set `DATABASE_URL=postgresql+asyncpg://...`
+  to switch to Postgres.
 
-- `file:...` → SQLite via `@prisma/adapter-better-sqlite3`
-- `postgresql://...` → PostgreSQL via `@prisma/adapter-pg`
+## htmx vs Alpine.js vs Full Page
 
-When writing database code, avoid PostgreSQL-specific SQL. Use Prisma ORM
-methods. If you must use raw SQL, check `isSqlite()` and branch accordingly.
-
-SQLite schema is generated from the PostgreSQL schema by `server/prisma/sqlite-push.sh`,
-which strips `@db.*` annotations and swaps the provider.
+| Use case | Approach |
+|---|---|
+| Initial page load | FastAPI route + Jinja2 template |
+| Server data update | htmx (`hx-post`, `hx-get`) → returns HTML partial |
+| Local UI state | Alpine.js (`x-data`, `@click`, `x-show`) |
+| Complex SPA | Use the `docker-node-template` instead |
 
 ## Integrations Degrade Gracefully
 
-All OAuth integrations (GitHub, Google, Pike 13) are optional. The server
-starts cleanly without credentials — unconfigured integrations return
-**501** with setup instructions. Never make the app fail to start because
-an integration secret is missing.
+Optional integrations must not prevent the app from starting.  Check
+for required secrets at startup and log a warning if missing; return
+**501** from the relevant endpoint.

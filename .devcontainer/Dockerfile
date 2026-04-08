@@ -1,10 +1,7 @@
-FROM mcr.microsoft.com/devcontainers/typescript-node:20-bookworm
+FROM mcr.microsoft.com/devcontainers/python:3.12-bookworm
 
-# Python + pipx (for CLASI, dotconfig, rundbat)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 python3-pip python3-venv \
-    && rm -rf /var/lib/apt/lists/* \
-    && python3 -m pip install --break-system-packages pipx
+# pipx (for CLASI, dotconfig, rundbat)
+RUN python3 -m pip install --break-system-packages pipx
 
 # age + sops (for secrets decryption)
 ARG AGE_VERSION=1.2.0
@@ -27,3 +24,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 # Install CLASI via pipx (runs as root; post-create.sh skips this step)
 ENV PIPX_HOME=/opt/pipx
 ENV PIPX_BIN_DIR=/usr/local/bin
+
+RUN pipx install "git+https://github.com/ericbusboom/claude-agent-skills.git" \
+    && pipx install "git+https://github.com/ericbusboom/dotconfig.git" \
+    && pipx install "git+https://github.com/ericbusboom/rundbat.git" \
+    || true

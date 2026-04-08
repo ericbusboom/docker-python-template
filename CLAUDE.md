@@ -1,6 +1,6 @@
-# Docker Node Application Template
+# Docker Python Application Template
 
-This is a template repo for building new web applications with AI and deploying them to
+This is a template repo for building Python-first web applications and deploying them to
 Docker.
 
 **MANDATORY: Before doing ANY work that involves code or planning on code, you MUST call `get_se_overview()` to load the software engineering process. Do this at the start of every conversation. No exceptions.**
@@ -32,13 +32,12 @@ Human-facing docs live in `docs/`. Consult them for reference:
 - [docs/template-spec.md](docs/template-spec.md) — Technology decisions, project structure, conventions
 - [docs/deployment.md](docs/deployment.md) — Production builds, deployment
 - [docs/secrets.md](docs/secrets.md) — Secrets inventory and onboarding
-- [docs/api-integrations.md](docs/api-integrations.md) — GitHub, Google, Pike 13 OAuth setup
 - [docs/testing.md](docs/testing.md) — Full test strategy and patterns
 
 Agent behavioral rules are in `.claude/rules/` (auto-loaded):
 
-- `testing.md` — Test authentication, assertions, layer separation, SQLite
-- `architecture.md` — Service layer, API conventions, database philosophy, dual DB support
+- `testing.md` — Test conventions, pytest fixtures, async tests
+- `architecture.md` — Router/service pattern, htmx/Alpine philosophy, DB migration path
 - `secrets.md` — Secrets handling, security rules, config structure
 - `rundbat.md` — Database and deployment MCP tools
 

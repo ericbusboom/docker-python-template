@@ -1,0 +1,12 @@
+# dev/test-only dependencies
+# Install with: pip install -r requirements-dev.txt
+
+-r requirements.txt
+
+# ── Testing ───────────────────────────────────────────────
+pytest==8.3.5
+pytest-asyncio==0.25.3
+httpx==0.28.1                 # async test client for FastAPI
+
+# ── Linting / formatting ──────────────────────────────────
+ruff==0.11.4

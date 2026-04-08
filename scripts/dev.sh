@@ -3,12 +3,21 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# Load environment
+# Activate virtual environment if present
+if [ -f .venv/bin/activate ]; then
+  # shellcheck disable=SC1091
+  source .venv/bin/activate
+fi
+
+# Load .env
 set -a
+# shellcheck disable=SC1091
 . ./.env 2>/dev/null || true
 set +a
 
-# SQLite mode — no Docker needed
-exec npx concurrently -n server,client -c green,magenta \
-  "cd server && npx prisma generate && npx prisma migrate dev && npm run dev" \
-  "cd client && npx wait-on http://localhost:3000/api/health && npx vite --host"
+# Ensure DB migrations are up to date
+echo "Applying migrations..."
+alembic upgrade head
+
+# Start uvicorn with hot-reload
+exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --reload

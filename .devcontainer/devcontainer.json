@@ -1,9 +1,9 @@
 {
-  "name": "Docker Node App",
+  "name": "Python FastAPI App",
   // Pre-built image from .devcontainer/Dockerfile via .github/workflows/devcontainer-image.yml
   // To build locally instead, replace "image" with:
   //   "build": { "dockerfile": "Dockerfile" },
-  "image": "ghcr.io/league-examples/docker-node-template/devcontainer:latest",
+  "image": "ghcr.io/ericbusboom/docker-python-template/devcontainer:latest",
 
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -20,13 +20,14 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "Prisma.prisma",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "ms-playwright.playwright"
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml",
+        "mtxr.sqltools"
       ]
     }
   },
 
-  "forwardPorts": [3000, 5173]
+  "forwardPorts": [8000]
 }

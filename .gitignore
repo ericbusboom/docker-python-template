@@ -1,9 +1,17 @@
-# Dependencies
-node_modules/
-
-# Build output
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+pip-log.txt
+*.egg-info/
 dist/
-*.tsbuildinfo
+build/
+.eggs/
 
 # Environment / secrets
 .env
@@ -14,32 +22,30 @@ dist/
 # Config (local overrides are gitignored; secrets.env is SOPS-encrypted and committed)
 config/local/
 
-# Prisma
-.prisma/
-server/src/generated/
-server/prisma/*.db
-server/prisma/*.db-journal
+# Database
+data/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Alembic
+alembic/versions/__pycache__/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Editors (local settings only; .vscode/ is committed for shared config)
+# Editors
 *.swp
 *.swo
 *~
 
 # Test output
-coverage/
-test-results/
-playwright-report/
-blob-report/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
 
 # Logs
 *.log
-pids/
-*.pid
-*.seed
-
-# Backup data
-data/
